@@ -47,6 +47,7 @@ def main(task_for):
             "try": all_tests,
             "try-taskcluster": [
                 # Add functions here as needed, in your push to that branch
+                windows_unit,
             ],
             "master": [
                 upload_docs,
@@ -507,7 +508,7 @@ def linux_task(name):
 def windows_task(name):
     return (
         decisionlib.WindowsGenericWorkerTask(name)
-        .with_worker_type("servo-win2016")
+        .with_worker_type("servo-win2016-staging")
         .with_treeherder_required()
     )
 
