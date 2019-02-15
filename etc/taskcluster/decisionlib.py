@@ -432,7 +432,7 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         """
         if sparse_checkout:
             self.with_mounts({
-                "file": "sparse-checkout"
+                "file": "sparse-checkout",
                 "content": {"raw": "\n".join(sparse_checkout)},
             })
             git += """
