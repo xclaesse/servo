@@ -14,12 +14,24 @@ LIBPATHS.debug = \
 LIBPATHS.release = \
     ../../../target/magicleap/aarch64-linux-android/release
 
+DATAS.release = \
+    ../../../target/magicleap/aarch64-linux-android/release/*.so : bin/
+
+DATAS.debug = \
+    ../../../target/magicleap/aarch64-linux-android/debug/*.so : bin/
+
 STLIBS = \
     mlservo
 
 SHLIBS = \
     log \
-    z
+    z \
+    glib-2.0 \
+    gobject-2.0 \
+    gstreamer-1.0 \
+    gstapp-1.0 \
+    gstgl-1.0 \
+    gstvideo-1.0
 
 USES = \
     lumin_runtime \

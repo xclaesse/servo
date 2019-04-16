@@ -476,11 +476,6 @@ class MachCommands(CommandBase):
                         subprocess.call(["perl", "-i", "-pe", expr, pc])
 
         if magicleap:
-            if platform.system() not in ["Darwin"]:
-                raise Exception("Magic Leap builds are only supported on macOS. "
-                                "If you only wish to test if your code builds, "
-                                "run ./mach build -p libmlservo.")
-
             ml_sdk = env.get("MAGICLEAP_SDK")
             if not ml_sdk:
                 raise Exception("Magic Leap builds need the MAGICLEAP_SDK environment variable")
@@ -554,6 +549,20 @@ class MachCommands(CommandBase):
 
             # Only build libmlservo
             opts += ["--package", "libmlservo"]
+
+            # Make pkg-config find our cross built GStreamer
+            gst_root = os.path.join(self.context.topdir, "support", "magicleap", "gstreamer", "_install")
+            if os.path.exists(gst_root):
+                gst_pkgconfig = os.path.join(gst_root, 'system', 'lib64', 'pkgconfig')
+                prev_paths = env.get('PKG_CONFIG_PATH')
+                if prev_paths:
+                    new_paths = os.pathsep.join([prev_paths, gst_pkgconfig])
+                else:
+                    new_paths = gst_pkgconfig
+                env["PKG_CONFIG_PATH"] = new_paths
+                env["PKG_CONFIG_ALLOW_CROSS"] = '1'
+            else:
+                gst_root = None
 
             # Download and build OpenSSL if necessary
             status = call(path.join(ml_support, "openssl.sh"), env=env, verbose=verbose)
@@ -724,6 +733,22 @@ class MachCommands(CommandBase):
                                                                                      0)
                 except ImportError:
                     pass
+            elif magicleap and gst_root:
+                # Copy all GStreamer libs and plugins. Unfortunately Magic Leap
+                # device only allows dlopen() plugins from the same directory as
+                # it lookup for libraries. Luckily GStreamer is capable of
+                # detecting if a .so file is a plugin or library.
+                gst_libs_src_dir = path.join(gst_root, "system", "lib64")
+                gst_plugins_src_dir = path.join(gst_libs_src_dir, "gstreamer-1.0")
+                gst_dst_dir = path.join(base_path, "debug" if dev else "release")
+                for src_dir in [gst_libs_src_dir, gst_plugins_src_dir]:
+                    src_names = os.listdir(src_dir)
+                    for src_name in src_names:
+                        src_path = path.join(src_dir, src_name)
+                        try:
+                            shutil.copy(src_path, gst_dst_dir)
+                        except:
+                            pass
 
         # Generate Desktop Notification if elapsed-time > some threshold value
         notify_build_done(self.config, elapsed, status == 0)

@@ -279,7 +279,7 @@ bool Servo2D::updateLoop(float fDelta) {
 
 bool Servo2D::eventListener(lumin::ServerEvent* event) {
   // Dispatch based on event type
-  lumin::ServerEventType typ = event->getServerEventType();
+  lumin::ServerEventType typ = (lumin::ServerEventType)event->getServerEventTypeValue();
   switch (typ) {
     case lumin::ServerEventType::kGestureInputEvent:
       return gestureEventListener(static_cast<lumin::GestureInputEventData*>(event));

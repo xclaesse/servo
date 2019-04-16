@@ -222,8 +222,6 @@ class PackageCommands(CommandBase):
         dir_to_root = self.get_top_dir()
         target_dir = path.dirname(binary_path)
         if magicleap:
-            if platform.system() not in ["Darwin"]:
-                raise Exception("Magic Leap builds are only supported on macOS.")
             if not env.get("MAGICLEAP_SDK"):
                 raise Exception("Magic Leap builds need the MAGICLEAP_SDK environment variable")
             if not env.get("MLCERT"):
